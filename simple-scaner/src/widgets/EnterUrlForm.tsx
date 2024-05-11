@@ -10,10 +10,11 @@ import {
     FormDescription,
     FormField,
     FormItem,
-    FormLabel,
     FormMessage,
 } from "@/components/ui/form"
 import { Input } from "@/components/ui/input"
+import { useNavigate } from "react-router-dom";
+import {RouterNames} from "@/shared/enums/RouterNames.ts";
 
 const formSchema = z.object({
     target: z.string().url("Invalid URL, Ip address or hostname"),
@@ -22,6 +23,8 @@ const formSchema = z.object({
 
 
 const EnterUrlForm = () => {
+    const navigate = useNavigate();
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -31,7 +34,15 @@ const EnterUrlForm = () => {
     })
 
     function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values)
+        const url = values.target.split('//')[1];
+        console.log(url);
+        const targetScanner = {
+            target: 'url',
+            email: values.email,
+        };
+
+        localStorage.setItem('target-scanner', JSON.stringify(targetScanner));
+        navigate(RouterNames.SCANS.to);
     }
 
     return (
@@ -52,34 +63,38 @@ const EnterUrlForm = () => {
                     <FormField
                         control={form.control}
                         name="target"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input className={"rounded-xl focus:border-green-500"} placeholder="Enter a URL, IP address or hostname" {...field} />
+                                    <Input className={"rounded-xl focus:border-green-500"}
+                                           placeholder="Enter a URL, IP address or hostname" {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     This is the target you want to scan.
                                 </FormDescription>
-                                <FormMessage className={"text-red-600"} />
+                                <FormMessage className={"text-red-600"}/>
                             </FormItem>
                         )}
                     />
                     <FormField
                         control={form.control}
                         name="email"
-                        render={({ field }) => (
+                        render={({field}) => (
                             <FormItem>
                                 <FormControl>
-                                    <Input className={"rounded-xl focus:border-green-500"} placeholder="examples@gmail.com" {...field} />
+                                    <Input className={"rounded-xl focus:border-green-500"}
+                                           placeholder="examples@gmail.com" {...field} />
                                 </FormControl>
                                 <FormDescription>
                                     The scan results will be sent to this address.
                                 </FormDescription>
-                                <FormMessage className={"text-red-600"} />
+                                <FormMessage className={"text-red-600"}/>
                             </FormItem>
                         )}
                     />
-                    <Button className={"hover:bg-green-300 duration-300 hover:text-white bg-green-100 text-green-500 rounded-xl w-[100%]"} type="submit">Search</Button>
+                    <Button
+                        className={"hover:bg-green-300 duration-300 hover:text-white bg-green-100 text-green-500 rounded-xl w-[100%]"}
+                        type="submit">Search</Button>
                 </form>
             </Form>
         </div>
